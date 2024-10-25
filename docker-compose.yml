@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  mongodb:
+    image: mongo:4.4
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  backend:
+  image: rightshub/rightshub_repo_docker-backend
+    build:
+      context: ./rightshub_api
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      - mongodb
+    env_file:
+      - ./rightshub_api/.env  # Use the .env file from the backend directory
+
+  frontend:
+  image: rightshub/rightshub_repo_docker-frontend
+    build:
+      context: ./rightshub_front
+      dockerfile: Dockerfile
+    ports:
+      - "4200:4200"
+    # volumes:
+    #   - ./frontend:/app
+    #   - /app/node_modules
+    depends_on:
+      - backend
+    environment:
+      - NODE_ENV=development
+
+
+
+volumes:
+  mongodb_data:
